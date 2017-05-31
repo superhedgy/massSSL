@@ -20,7 +20,7 @@ fi
 
 #if [ ${#} -eq 0 ]
 if [ $# != 1 ]; then
-  echo -e "Usage: ./massSSL.sh tagets.txt \n"
+  echo -e "Usage: ./massSSL.sh targets.txt \n"
   exit 1
 else
   if [ $1 == '--install' ]; then
@@ -46,38 +46,48 @@ do
 exec 3>&2
 exec 2> /dev/null
 
-
 ciphers=$(openssl ciphers 'ALL:eNULL' | sed -e 's/:/ /g')
 
-output=$((echo " " | /usr/bin/openssl s_client -connect $ip:443 -cipher "DES-CBC3-SHA" )& sleep 5;pkill -f "openssl")
+ssl2=$(echo " \n\n" | /usr/bin/openssl s_client -connect $ip:443 -ssl2&)
+ssl3=$(echo " \n\n" | /usr/bin/openssl s_client -connect $ip:443 -ssl3&)
+tls1=$(echo " \n\n" | /usr/bin/openssl s_client -connect $ip:443 -tls1&)
+cipher1=$(echo " \n\n" | /usr/bin/openssl s_client -connect $ip:443 -cipher "DES-CBC3-SHA"&)
+cipher2=$(echo " \n\n" | /usr/bin/openssl s_client -connect $ip:443 -ssl3 -cipher "RC4"&)
+cipher3=$(echo " \n\n" | /usr/bin/openssl s_client -connect $ip:443 -ssl3 -cipher "EXP"&)
 
-  if (echo $output | grep -q "END CERTIFICATE"); then
+wait
+echo -e "$ip:"
+  if (echo $cipher1 | grep -q "END CERTIFICATE"); then
+    echo $ip >> tls1.txt
+    echo "[+] TLS v1.0 protocol is supported"
+  else
+    echo "[-] TLS v1.0 protocol is NOT supported"
+  fi
+
+  if (echo $cipher1 | grep -q "END CERTIFICATE"); then
     echo $ip >> DES_CBC3_SHA_ciphers.txt
-    echo "[+] $ip : DES-CBC3-SHA is supported"
+    echo "[+] DES-CBC3-SHA is supported"
   else
-    echo "[-] $ip : DES-CBC3-SHA NOT supported"
+    echo "[-] DES-CBC3-SHA is NOT supported"
   fi
 
-  if (echo $output | grep -q "self signed"); then
-    echo $ip >> certificates.txt
-    echo "[+] $ip : Self Signed Certificate Detected"
-  fi
-
-output=$((echo " \n" | /usr/bin/openssl s_client -connect $ip:443 -ssl3 -cipher "RC4")& sleep 5;pkill -f "openssl")
-
-  if (echo $output | grep -q "END CERTIFICATE"); then
+  if (echo $cipher2 | grep -q "END CERTIFICATE"); then
     echo $ip >> rc4.txt
-    echo "[+] $ip : RC4 is supported"
+    echo "[+] RC4 is supported"
   else
-    echo "[-] $ip : RC4 NOT supported"
+    echo "[-] RC4 is NOT supported"
   fi
 
-output=$((echo "" | /usr/bin/openssl s_client -connect $ip:443 -ssl3 -cipher "EXP")& sleep 5;pkill -f "openssl")
-
-    if (echo $output | grep -q "END CERTIFICATE"); then
+  if (echo $cipher3 | grep -q "END CERTIFICATE"); then
       echo $ip >> exp.txt
-      echo "[+] $ip : EXP is supported"
-    else
-      echo "[-] $ip : EXP NOT supported"
-    fi
+      echo "[+] EXP is supported"
+  else
+      echo "[-] EXP is NOT supported"
+  fi
+
+  if (echo $cipher1 | grep -q "self signed"); then
+    echo $ip >> certificates.txt
+    echo "[+] Self Signed Certificate Detected"
+  fi
+
 done;
