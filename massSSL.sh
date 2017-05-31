@@ -7,15 +7,21 @@
 # Check tls1
 
 echo -e "\n massSSL v1.0 \n\n"
+echo -e "Author: superhedgy"
 
 version=$(echo "version" | openssl | cut -f3 -d " ")
-echo -e "OpennSSL version: $version \n"
+
+if [  "$(which openssl)" != "" ]; then
+  echo -e "OpenSSL version: $version \n"
+else
+  echo -e "OpenSSL was not detected. Please use the --install option ./massSSL.sh --install"
+  exit 1
+fi
 
 #if [ ${#} -eq 0 ]
-if [ $@ != 1 ]; then
-
-  echo -e "\n ./massSSL.sh tagets.txt"
-
+if [ $# != 1 ]; then
+  echo -e "Usage: ./massSSL.sh tagets.txt \n"
+  exit 1
 else
   if [ $1 == '--install' ]; then
     echo "Installing dependencies..."
@@ -23,7 +29,7 @@ else
     tar -xvzf openssl-0.9.8k.tar.gz
     mv openssl-0.9.8k ./lib/
     cd ./lib
-    ./Configure darwin64-x86_64-cc -shared --openssldir="/tools/massSSL"
+    ./Configure darwin64-x86_64-cc -shared
     make
     cd ./../
     rm -f openssl-0.9.8k.tar.gz
