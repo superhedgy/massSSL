@@ -1,7 +1,5 @@
 #!/bin/bash
-#Mass SSL v1.0
-
-#timeout () { perl -e 'alarm shift; exec @ARGV' "$@"; } # define a helper function
+#Mass SSL v1.1
 
 # -tls1 -ssl3
 # Check tls1
@@ -57,7 +55,21 @@ cipher3=$(echo " \n\n" | /usr/bin/openssl s_client -connect $ip:443 -ssl3 -ciphe
 
 wait
 echo -e "$ip:"
-  if (echo $cipher1 | grep -q "END CERTIFICATE"); then
+  if (echo $ssl2 | grep -q "END CERTIFICATE"); then
+    echo $ip >> ssl2.txt
+    echo "[+] SSL v2.0 protocol is supported"
+  else
+    echo "[-] SSL v2.0 protocol is NOT supported"
+  fi
+
+  if (echo $ssl3 | grep -q "END CERTIFICATE"); then
+    echo $ip >> ssl3.txt
+    echo "[+] SSL v3.0 protocol is supported"
+  else
+    echo "[-] SSL v3.0 protocol is NOT supported"
+  fi
+
+  if (echo $tls1 | grep -q "END CERTIFICATE"); then
     echo $ip >> tls1.txt
     echo "[+] TLS v1.0 protocol is supported"
   else
