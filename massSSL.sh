@@ -1,5 +1,5 @@
 #!/bin/bash
-#Mass SSL
+#Mass SSL v1.0
 
 #timeout () { perl -e 'alarm shift; exec @ARGV' "$@"; } # define a helper function
 
@@ -14,6 +14,9 @@ echo -e "OpennSSL version: $version \n"
 #if [ ${#} -eq 0 ]
 if [ $@ != 1 ]; then
 
+  echo -e "\n ./massSSL.sh tagets.txt"
+
+else
   if [ $1 == '--install' ]; then
     echo "Installing dependencies..."
     wget https://www.openssl.org/source/openssl-0.9.8k.tar.gz
@@ -32,7 +35,7 @@ fi
 
 for ip in $(cat $1);
 do
-  
+
 # Supress Bash Errors
 exec 3>&2
 exec 2> /dev/null
@@ -54,7 +57,7 @@ output=$((echo " " | /usr/bin/openssl s_client -connect $ip:443 -cipher "DES-CBC
     echo "[+] $ip : Self Signed Certificate Detected"
   fi
 
-output=$((echo "" | /usr/bin/openssl s_client -connect $ip:443 -ssl3 -cipher "RC4")& sleep 5;pkill -f "openssl")
+output=$((echo " \n" | /usr/bin/openssl s_client -connect $ip:443 -ssl3 -cipher "RC4")& sleep 5;pkill -f "openssl")
 
   if (echo $output | grep -q "END CERTIFICATE"); then
     echo $ip >> rc4.txt
