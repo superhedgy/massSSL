@@ -1,4 +1,12 @@
-massSSL v1.0
+massSSL v1.1
 Author: superhedgy
 
-Testing multiple SSL connections script.
+Description:
+The current version of massSSL script is a convinient way to test multiple IPs for best practice SSL/TSL configurations.
+
+Usage:
+./massSSL.sh targets.txt
+
+Functions:
+
+--install ::: Downloads OpenSSL version v0.9.8 which supports legacy protocols and cipher suites.
